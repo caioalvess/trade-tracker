@@ -1,7 +1,7 @@
-import { SetInitial } from "./components/backtest/buttons/set-initial";
-import { AddProfit } from "./components/backtest/buttons/add-profit";
-import { AddLoss } from "./components/backtest/buttons/add-loss";
-import { Undo } from "./components/backtest/buttons/undo";
+import { SetInitial } from "../components/backtest/buttons/set-initial";
+import { AddProfit } from "../components/backtest/buttons/add-profit";
+import { AddLoss } from "../components/backtest/buttons/add-loss";
+import { Undo } from "../components/backtest/buttons/undo";
 import { Input } from "@/components/ui/input";
 
 export default function Component() {
