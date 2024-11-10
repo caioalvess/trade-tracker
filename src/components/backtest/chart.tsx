@@ -1,126 +1,96 @@
 "use client";
-import { useRef, useEffect, useState } from "react";
-import type { ChartData } from "chart.js";
+
+import React from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  Title,
   Tooltip,
-  Legend,
   Filler,
 } from "chart.js";
-import { Chart } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
+  Title,
   Tooltip,
-  Legend,
   Filler
 );
 
-const initialLabels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-const initialData = [
-  1902, 893, 1293, 723, 2341, 2113, 236, 578, 912, 2934, 345, 782,
-];
+export function Chart() {
+  const trades = [
+    { tradeNumber: 1, amount: 1000 },
+    { tradeNumber: 2, amount: 1100 },
+    { tradeNumber: 3, amount: 950 },
+    { tradeNumber: 4, amount: 1200 },
+    { tradeNumber: 5, amount: 1150 },
+    { tradeNumber: 6, amount: 1300 },
+  ];
 
-function createGradient(ctx: CanvasRenderingContext2D) {
-  const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+  const amounts = trades.map((trade) => trade.amount);
+  const tradeNumbers = trades.map((trade) => trade.tradeNumber);
 
-  gradient.addColorStop(0, "rgba(0, 97, 215, 0.8)");
-  gradient.addColorStop(0.5, "rgba(0, 150, 230, 0.4)");
-  gradient.addColorStop(1, "rgba(0, 200, 255, 0.1)");
-
-  return gradient;
-}
-
-export function AreaChart() {
-  const chartRef = useRef<ChartJS>(null);
-  const [chartData, setChartData] = useState<ChartData<"line">>({
-    labels: initialLabels,
+  const data = {
+    labels: tradeNumbers,
     datasets: [
       {
-        data: initialData,
-        borderColor: "#3182ce",
-        backgroundColor: "", // Inicialize o backgroundColor como uma string vazia
-        fill: true,
+        label: "Valor do Trade",
+        data: amounts,
+        borderColor: "rgb(53, 162, 235)",
+        backgroundColor: "rgba(53, 162, 235, 0.5)",
+        fill: "start",
+        tension: 0.3,
+        borderWidth: 2,
+        pointBackgroundColor: "rgb(53, 162, 235)",
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
+        pointRadius: 4,
       },
     ],
-  });
-
-  useEffect(() => {
-    const chart = chartRef.current;
-
-    if (chart && chart.ctx) {
-      // Apenas crie o gradiente quando o contexto estiver disponível
-      const gradientBackground = createGradient(chart.ctx);
-      setChartData((prevData) => ({
-        ...prevData,
-        datasets: prevData.datasets.map((dataset) => ({
-          ...dataset,
-          backgroundColor: gradientBackground,
-        })),
-      }));
-    }
-  }, []);
-
-  const addDataPoint = () => {
-    setChartData((prevData) => {
-      const newData = Math.floor(Math.random() * 3000); // Novo valor aleatório para exemplo
-      const newLabel = (prevData.labels?.length || 0) + 1;
-
-      return {
-        ...prevData,
-        labels: [...(prevData.labels || []), newLabel],
-        datasets: prevData.datasets.map((dataset) => ({
-          ...dataset,
-          data: [...dataset.data, newData],
-        })),
-      };
-    });
   };
 
   const options = {
     responsive: true,
-    elements: {
-      line: {
-        tension: 0.3,
-        borderWidth: 1.5,
-      },
-      point: { radius: 0 },
-    },
+    maintainAspectRatio: false,
     plugins: {
-      legend: {
+      title: {
         display: false,
       },
     },
     scales: {
-      x: {
+      y: {
+        min: Math.min(...amounts),
+        max: Math.max(...amounts),
+        ticks: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          callback: function (value: any) {
+            if (amounts.includes(Number(value))) {
+              return value;
+            }
+            return "";
+          },
+        },
         grid: {
-          display: false,
+          color: "rgba(0, 0, 0, 0.05)",
         },
       },
-      y: {
-        ticks: {
-          callback: (value: any) => value,
+      x: {
+        title: {
+          display: false,
         },
       },
     },
   };
 
   return (
-    <div>
-      <button
-        onClick={addDataPoint}
-        className="mb-4 p-2 bg-blue-500 text-white rounded"
-      >
-        Adicionar Ponto de Dados
-      </button>
-      <Chart ref={chartRef} type="line" data={chartData} options={options} />
+    <div className="w-full h-full">
+      <Line options={options} data={data} />
     </div>
   );
 }

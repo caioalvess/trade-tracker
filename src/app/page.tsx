@@ -1,5 +1,5 @@
 import { AdvancedMetrics } from "@/components/backtest/advanced-metrics";
-import { AreaChart } from "@/components/backtest/chart";
+import { Chart } from "@/components/backtest/chart";
 import { Metrics } from "@/components/backtest/metrics";
 import { TradeControl } from "@/components/backtest/trade-control";
 import { TradeOptions } from "@/components/backtest/trade-options";
@@ -21,7 +21,7 @@ export default function Component() {
 
       <div className="w-full flex px-4 flex-1 pb-4 gap-4">
         <div className="flex-1">
-          <AreaChart />
+          <Chart />
         </div>
         <div>
           <AdvancedMetrics />
