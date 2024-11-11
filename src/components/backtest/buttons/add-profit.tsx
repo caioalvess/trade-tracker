@@ -5,10 +5,15 @@ import { useBacktestStore } from "@/stores/backtest/backtest-store";
 import { Plus } from "lucide-react";
 
 export function AddProfit() {
-  const { initial } = useBacktestStore();
+  const { initial, addTrade, profitInput } = useBacktestStore();
 
   return (
-    <Button disabled={!initial} className="bg-positive" variant="positive">
+    <Button
+      disabled={!initial}
+      className="bg-positive"
+      variant="positive"
+      onClick={() => addTrade(profitInput, "profit")}
+    >
       <Plus /> Add Profit
     </Button>
   );

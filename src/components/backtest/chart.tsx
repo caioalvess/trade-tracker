@@ -84,6 +84,9 @@ export function Chart() {
         title: {
           display: false,
         },
+        grid: {
+          display: false,
+        },
       },
     },
   };
