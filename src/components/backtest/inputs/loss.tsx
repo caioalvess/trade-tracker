@@ -8,6 +8,7 @@ export function Loss() {
 
   return (
     <Input
+      className="bg-white"
       type="number"
       value={lossInput}
       onChange={(e) => setLossInput(Number(e.target.value))}

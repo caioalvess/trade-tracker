@@ -6,24 +6,24 @@ import { TradeOptions } from "@/components/backtest/trade-options";
 
 export default function Component() {
   return (
-    <div className="w-full flex flex-col gap-4 h-screen">
-      <div className="w-full flex">
-        <div className="min-h-fit pt-4 pl-4">
+    <div className="w-full flex flex-col gap-4 h-screen p-4">
+      <div className="w-full flex gap-4">
+        <div className="min-h-fit">
           <TradeOptions />
         </div>
         <div>
           <TradeControl />
         </div>
-        <div className="flex-1 pt-4 pr-4">
+        <div className="flex-1">
           <Metrics />
         </div>
       </div>
 
-      <div className="w-full flex px-4 flex-1 pb-4 gap-4">
-        <div className="flex-1">
+      <div className="w-full flex flex-1 gap-4">
+        <div className="w-full">
           <Chart />
         </div>
-        <div>
+        <div className="w-1/3">
           <AdvancedMetrics />
         </div>
       </div>

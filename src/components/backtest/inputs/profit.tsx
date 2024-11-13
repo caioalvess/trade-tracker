@@ -8,6 +8,7 @@ export function Profit() {
 
   return (
     <Input
+      className="bg-white"
       type="number"
       value={profitInput}
       onChange={(e) => setProfitInput(Number(e.target.value))}

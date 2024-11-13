@@ -8,7 +8,7 @@ import { Profit } from "./inputs/profit";
 
 export function TradeControl() {
   return (
-    <div className="w-full max-w-sm space-y-4 p-4">
+    <div className="w-full max-w-sm space-y-4 p-4 bg-zinc-900 rounded-lg">
       <div className="grid grid-cols-3 gap-2">
         <Initial />
         <Profit />

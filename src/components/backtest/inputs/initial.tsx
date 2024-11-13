@@ -8,6 +8,7 @@ export function Initial() {
 
   return (
     <Input
+      className="bg-white"
       disabled={!!initial}
       type="number"
       value={initialInput}

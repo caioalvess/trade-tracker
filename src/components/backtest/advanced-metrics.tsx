@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function AdvancedMetrics() {
   return (
-    <Card className="w-full min-w-96 h-full bg-zinc-900 text-white border-zinc-800">
+    <Card className="w-full h-full bg-zinc-900 text-white border-zinc-800">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-md font-medium">Profitability</CardTitle>
       </CardHeader>
