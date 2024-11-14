@@ -3,6 +3,8 @@ import { create } from "zustand";
 type TradeProps = {
   amount: number;
   profitOrLoss: "profit" | "loss";
+  profit: number;
+  loss: number;
   winrate: number;
   pnl: {
     percentage: number;
@@ -15,6 +17,13 @@ type TradeProps = {
   };
   currentUpdatedInitial: number;
   tradeOrder: number;
+  profitFactor: number;
+  largestProfit: number;
+  largestLoss: number;
+  maxConsecWins: number;
+  maxConsecLosses: number;
+  averageWin: number;
+  averageLoss: number;
 };
 
 type BacktestStoreProps = {
@@ -34,21 +43,34 @@ type BacktestStoreProps = {
     profitOrLoss: "profit" | "loss",
     amount: number
   ) => { percentage: number; value: number };
-  addTrade: (amount: number, profitOrLoss: "profit" | "loss") => void;
+  profitFactorCalc: (lossesSum: number, profitsSum: number) => number;
+  addTrade: (
+    amount: number,
+    profitOrLoss: "profit" | "loss",
+    profit: number,
+    loss: number
+  ) => void;
+  undo: () => void;
 };
 
 export const useBacktestStore = create<BacktestStoreProps>((set, get) => ({
-  initial: 0,
-  setInitial: (initial: number) => set({ initial }),
-  trades: [],
-  setTrades: (trades: TradeProps[]) => set({ trades }),
+  /* STATES */
 
+  initial: 0,
+  trades: [],
   initialInput: 0,
-  setInitialInput: (initialInput: number) => set({ initialInput }),
   profitInput: 0,
-  setProfitInput: (profitInput: number) => set({ profitInput }),
   lossInput: 0,
+
+  /* SETS */
+
+  setInitial: (initial: number) => set({ initial }),
+  setTrades: (trades: TradeProps[]) => set({ trades }),
+  setInitialInput: (initialInput: number) => set({ initialInput }),
+  setProfitInput: (profitInput: number) => set({ profitInput }),
   setLossInput: (lossInput: number) => set({ lossInput }),
+
+  /* FUNCTIONS */
 
   pnlCalc: (profitOrLoss: "profit" | "loss", amount: number) => {
     const { initial, trades } = get();
@@ -87,12 +109,25 @@ export const useBacktestStore = create<BacktestStoreProps>((set, get) => ({
     return pnl;
   },
 
-  addTrade: (amount: number, profitOrLoss: "profit" | "loss") => {
-    const { initial, trades, pnlCalc } = get();
+  profitFactorCalc: (lossesSum: number, profitsSum: number): number => {
+    if (lossesSum === 0 && profitsSum === 0) return 0;
+    if (lossesSum === 0 && profitsSum !== 0) return 100;
+    if (lossesSum !== 0 && profitsSum === 0) return 0;
+
+    return Number((profitsSum / lossesSum).toFixed(2));
+  },
+
+  addTrade: (
+    amount: number,
+    profitOrLoss: "profit" | "loss",
+    profit: number,
+    loss: number
+  ) => {
+    const { initial, trades, pnlCalc, profitFactorCalc } = get();
 
     if (!initial) return;
 
-    const updatedTrades = [...trades, { amount, profitOrLoss }];
+    const updatedTrades = [...trades, { amount, profitOrLoss, profit, loss }];
 
     const profitTrades = updatedTrades.filter(
       (trade) => trade.profitOrLoss === "profit"
@@ -106,6 +141,71 @@ export const useBacktestStore = create<BacktestStoreProps>((set, get) => ({
 
     const pnl = pnlCalc(profitOrLoss, amount);
 
+    const profitsSum = updatedTrades.reduce(
+      (sum, trade) => sum + trade.amount,
+      0
+    );
+
+    const lossesSum = loserTrades.reduce((sum, trade) => sum + trade.amount, 0);
+
+    const profitFactor = profitFactorCalc(lossesSum, profitsSum);
+
+    const largestLoss = Math.max(
+      0,
+      ...updatedTrades
+        .filter((trade) => trade.profitOrLoss === "loss")
+        .map((trade) => trade.loss)
+    );
+
+    const largestProfit = Math.max(
+      0,
+      ...updatedTrades
+        .filter((trade) => trade.profitOrLoss === "profit")
+        .map((trade) => trade.profit)
+    );
+
+    const maxConsecLosses = updatedTrades.reduce((max, trade, index, array) => {
+      if (trade.profitOrLoss === "loss") {
+        let consecLosses = 1;
+        for (
+          let i = index + 1;
+          i < array.length && array[i].profitOrLoss === "loss";
+          i++
+        ) {
+          consecLosses++;
+        }
+        return Math.max(max, consecLosses);
+      }
+      return max;
+    }, 0);
+
+    const maxConsecWins = updatedTrades.reduce((max, trade, index, array) => {
+      if (trade.profitOrLoss === "profit") {
+        let consecWins = 1;
+        for (
+          let i = index + 1;
+          i < array.length && array[i].profitOrLoss === "profit";
+          i++
+        ) {
+          consecWins++;
+        }
+        return Math.max(max, consecWins);
+      }
+      return max;
+    }, 0);
+
+    const totalProfit = updatedTrades
+      .filter((trade) => trade.profitOrLoss === "profit")
+      .reduce((sum, trade) => sum + trade.profit, 0);
+
+    const averageWin = Number((totalProfit / profitTrades.length).toFixed(2));
+
+    const totalLoss = updatedTrades
+      .filter((trade) => trade.profitOrLoss === "loss")
+      .reduce((sum, trade) => sum + trade.loss, 0);
+
+    const averageLoss = Number((totalLoss / loserTrades.length).toFixed(2));
+
     const currentUpdatedInitial = !trades.length
       ? profitOrLoss === "profit"
         ? initial + amount
@@ -114,9 +214,11 @@ export const useBacktestStore = create<BacktestStoreProps>((set, get) => ({
       ? trades[trades.length - 1].currentUpdatedInitial + amount
       : trades[trades.length - 1].currentUpdatedInitial - amount;
 
-    const trade = {
+    const trade: TradeProps = {
       amount,
       profitOrLoss,
+      profit,
+      loss,
       winrate,
       pnl: pnl,
       totalTrades: trades.length + 1,
@@ -126,8 +228,25 @@ export const useBacktestStore = create<BacktestStoreProps>((set, get) => ({
       },
       currentUpdatedInitial,
       tradeOrder: trades.length + 1,
+      profitFactor,
+      largestLoss,
+      largestProfit,
+      maxConsecLosses,
+      maxConsecWins,
+      averageWin,
+      averageLoss,
     };
 
     set((state) => ({ trades: [...state.trades, trade] }));
+  },
+
+  undo: () => {
+    const { trades } = get();
+
+    if (!trades.length) return;
+
+    const updatedTrades = trades.slice(0, -1);
+
+    set({ trades: updatedTrades });
   },
 }));

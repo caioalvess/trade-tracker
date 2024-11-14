@@ -5,13 +5,13 @@ import { useBacktestStore } from "@/stores/backtest/backtest-store";
 import { Minus } from "lucide-react";
 
 export function AddLoss() {
-  const { initial, addTrade, lossInput } = useBacktestStore();
+  const { initial, addTrade, lossInput, profitInput } = useBacktestStore();
 
   return (
     <Button
       disabled={!initial}
       variant="destructive"
-      onClick={() => addTrade(lossInput, "loss")}
+      onClick={() => addTrade(lossInput, "loss", profitInput, lossInput)}
     >
       <Minus /> Add Loss
     </Button>

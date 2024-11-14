@@ -20,12 +20,8 @@ export default function Component() {
       </div>
 
       <div className="w-full flex flex-1 gap-4">
-        <div className="w-full">
-          <Chart />
-        </div>
-        <div className="w-1/3">
-          <AdvancedMetrics />
-        </div>
+        <Chart />
+        <AdvancedMetrics />
       </div>
     </div>
   );
